@@ -131,38 +131,49 @@ namespace biometria_5
             byte[] vs = new byte[data.Height * data.Stride];
             Marshal.Copy(data.Scan0, vs, 0, vs.Length);
 
-            Stack<Point> pixels = new Stack<Point>();
-            byte[] color = new byte[3] { (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255) };
-            pixels.Push(new Point(x*3, y));
-            int pixelCount = 0;
-            while (pixels.Count > 0 && pixelCount<maxPixels)
+            int GetIndex(int x, int y) =>
+                x * 3 + y * data.Stride;
+            (int X, int Y) GetCoords(int offset) =>
+                (x / 3 % 3, offset / data.Stride);
+
+            int firstPos = x + y * bitmap.Width * 3;
+            int[] directions =
             {
-                Point a = pixels.Pop();
-               
-                if (a.X < bitmap.Width * 3 -3 && a.X * 3 > 3 &&
-                        a.Y < bitmap.Height-3 && a.Y > 3)
+                -3, 3, data.Stride, -data.Stride            
+            };
+
+            Stack<int> pixels = new Stack<int>();
+            byte[] color = new byte[3] { (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255) };
+            pixels.Push(GetIndex(x, y));
+            int pixelCount = 0;
+            for (int k = 0; k < 3; k++)
+                while (pixels.Count > 0 && pixelCount<maxPixels)
                 {
-                    pixelCount++;
-                    if (vs[a.X * 3 + a.Y * bitmap.Width * 3] >= vs[x + y * bitmap.Width * 3] - thresholdMin && vs[a.X * 3 + a.Y * bitmap.Width * 3] <= vs[x + y * bitmap.Width * 3] + thresholdMax
-                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] >= vs[x + y * bitmap.Width * 3 + 1] - thresholdMin && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] <= vs[x + y * bitmap.Width * 3 + 1] + thresholdMax
-                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] >= vs[x + y * bitmap.Width * 3 + 2] - thresholdMin && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] <= vs[x + y * bitmap.Width * 3 + 2] + thresholdMax)
+                    var a = GetCoords(pixels.Pop() + k);
+                   
+                    if (a.X < data.Stride   - 3 && a.X * 3 > 3 &&
+                        a.Y < bitmap.Height - 3 && a.Y     > 3)
                     {
-                        vs[a.X * 3 + a.Y * bitmap.Width * 3] = color[0];
-                        vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] = color[1];
-                        vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] = color[2];
+                        int offset = a.X * 3 + a.Y * bitmap.Width * 3;
 
-                        if (vs[a.X * 3 + a.Y * bitmap.Width * 3 - 3] != color[0])
-                            pixels.Push(new Point(a.X - 1, a.Y));
-                        if (vs[a.X * 3 + a.Y * bitmap.Width * 3 + 3] != color[0])
-                            pixels.Push(new Point(a.X + 1, a.Y));
-                        if (vs[a.X * 3 + (a.Y+1) * bitmap.Width * 3] != color[0])
+                        bool match = true;
+                        if (
+                           vs[offset + k] >= vs[firstPos + k] - thresholdMin &&
+                           vs[offset + k] <= vs[firstPos + k] + thresholdMax)
+                           match = false;
 
-                            pixels.Push(new Point(a.X, a.Y + 1));
-                        if (vs[a.X * 3 + (a.Y - 1) * bitmap.Width * 3] != color[0])
-                            pixels.Push(new Point(a.X, a.Y - 1));
+                        pixelCount++;
+                        
+                        if (match) 
+                        {
+                            vs[offset + k] = color[k];
+
+                            foreach (var dir in directions)
+                                if (vs[offset + dir + k] != color[k])
+                                    pixels.Push(offset + dir);
+                        }
                     }
                 }
-            }
             Marshal.Copy(vs, 0, data.Scan0, vs.Length);
             bitmap.UnlockBits(data);
 

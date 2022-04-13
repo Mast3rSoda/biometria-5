@@ -1,34 +1,42 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace biometria_5
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         Bitmap? sourceImage = null;
         Bitmap? imageToEdit = null;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public int SliderValue
+        {
+            get => sliderValue;
+            set 
+            { 
+                sliderValue = value;
+                PropertyChanged?.Invoke(this, new(nameof(SliderValue)));
+            }
+        }
+
+        private int sliderValue;
+
         public MainWindow()
         {
             InitializeComponent();
+            this.DataContext = this;
         }
 
         private void OpenFile(object sender, RoutedEventArgs e)
@@ -74,9 +82,14 @@ namespace biometria_5
             Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
             bitmap = (Bitmap)this.imageToEdit.Clone();
             var mousePosition = e.GetPosition(SourceImage);
+            //mousePosition *= imageToEdit.Width / Image;
+            var w = imageToEdit.Width  / SourceImage.ActualWidth  ;
+            var h = imageToEdit.Height / SourceImage.ActualHeight ;
+            mousePosition.X *= w;
+            mousePosition.Y *= h;
             if (imageToEdit == null) return;
             SourceImage.Source = ImageSourceFromBitmap(Algorithm
-            .FloodFill(bitmap!, (int)mousePosition.X, (int)mousePosition.Y, (int)MinValue.Value, (int)MaxValue.Value, (int)Range.Value));
+            .FloodFill(bitmap!, (int)mousePosition.X, (int)mousePosition.Y, (int)MinValue.Value, (int)MaxValue.Value, SliderValue));
         }
         private void Apply_Click(object sender, RoutedEventArgs e)
         {

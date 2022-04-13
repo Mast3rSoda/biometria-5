@@ -21,7 +21,7 @@
             </Grid.RowDefinitions>
 
         <Image Name="SourceImage" MouseLeftButtonUp="MagicWand"/>
-        <Slider Grid.Row="1" Minimum="1" Maximum="10000" Name="Range"/>
+        <Slider Grid.Row="1" Minimum="1" Maximum="10000" Value="{Binding SliderValue}"/>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
