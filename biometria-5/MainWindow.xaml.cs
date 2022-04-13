@@ -60,16 +60,7 @@ namespace biometria_5
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            if (sourceImage == null)
-            {
-                MessageBox.Show("You haven't uploaded any files", "Image error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
-            bitmap = (Bitmap)this.imageToEdit.Clone();
-            SourceImage.Source = Algorithm
-                .Apply(bitmap, (int)e.NewValue)
-                .ToSource();
+            
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
@@ -91,5 +82,12 @@ namespace biometria_5
                 .FloodFill(bitmap!, (int)mousePosition.X,(int)mousePosition.Y, )
                 .ToSource();*/
         }
+        private void Apply_Click(object sender, RoutedEventArgs e)
+        {
+            MainImg.Source = Algorithm
+                .Apply(new Bitmap("../../../apple.png"), (int)maxValue.Value , (int)minValue.Value)
+                .ToSource();
+        }
+
     }
 }
