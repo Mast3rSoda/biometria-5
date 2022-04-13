@@ -31,14 +31,19 @@ namespace biometria_5
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            MainImg.Source = Algorithm
-                .Apply(new Bitmap("../../../apple.png"), (int)e.NewValue)
-                .ToSource();
+            
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             MainImg.Source = new Bitmap("../../../apple.png")
+                .ToSource();
+        }
+
+        private void Apply_Click(object sender, RoutedEventArgs e)
+        {
+            MainImg.Source = Algorithm
+                .Apply(new Bitmap("../../../apple.png"), (int)maxValue.Value , (int)minValue.Value)
                 .ToSource();
         }
 

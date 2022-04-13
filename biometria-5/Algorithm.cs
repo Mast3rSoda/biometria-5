@@ -15,7 +15,7 @@ namespace biometria_5
         // 300x200 % 4 == 0
         // 301x200 % 4 != 0 //
 
-        public static Bitmap Apply(Bitmap bmp, int threshold)
+        public static Bitmap Apply(Bitmap bmp, int threshold, int thresholdMin)
         {
             var bmpData = bmp.LockBits(
                 new Rectangle(0, 0, bmp.Width, bmp.Height),
@@ -57,32 +57,34 @@ namespace biometria_5
                 var current = new List<int>() { i };
                 var next = new List<int>();
 
-                int value = (data[i] + threshold / 2) / threshold;
-                indexToGroup[i] = groupCount;
-                byte[] rgb = new byte[3];
-                rand.NextBytes(rgb);
-                groupToColor[groupCount] = rgb;
-
-                while (current.Count > 0)
+                if (data[i] < threshold && data[i] > thresholdMin)
                 {
-                    foreach (int k in current)
-                        if (!all.Contains(k))
-                        {
-                            all.Add(k);
-                            indexToGroup[k] = groupCount;
+                    int value = (data[i] + threshold / 2) / threshold;
+                    indexToGroup[i] = groupCount;
+                    byte[] rgb = new byte[3];
+                    rand.NextBytes(rgb);
+                    groupToColor[groupCount] = rgb;
 
-                            foreach (int offset in offsets)
+                    while (current.Count > 0)
+                    {
+                        foreach (int k in current)
+                            if (!all.Contains(k))
                             {
-                                int o = k + offset;
-                                if (o > 0 && o < length &&
-                                    value == (data[o] + threshold / 2) / threshold)
-                                    next.Add(o);
-                            }
-                        }
-                    current = next;
-                    next = new();
-                }
+                                all.Add(k);
+                                indexToGroup[k] = groupCount;
 
+                                foreach (int offset in offsets)
+                                {
+                                    int o = k + offset;
+                                    if (o > 0 && o < length &&
+                                        value == (data[o] + threshold / 2) / threshold)
+                                        next.Add(o);
+                                }
+                            }
+                        current = next;
+                        next = new();
+                    }
+                }
                 ++groupCount;
             }
 
