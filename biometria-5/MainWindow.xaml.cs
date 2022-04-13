@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -9,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -21,26 +24,72 @@ namespace biometria_5
     /// </summary>
     public partial class MainWindow : Window
     {
+        Bitmap? sourceImage = null;
+        Bitmap? imageToEdit = null;
         public MainWindow()
         {
             InitializeComponent();
+        }
 
-            MainImg.Source = new Bitmap("../../../apple.png")
-                .ToSource();
+        private void OpenFile(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Image files (*.jpg;*.png)|*.jpg;*.png|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                string fileName = openFileDialog.FileName;
+                imageToEdit = this.sourceImage = new Bitmap($"{fileName}");
+                SourceImage.Source = ImageSourceFromBitmap(this.sourceImage);
+            }
+        }
+        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+
+        public static extern bool DeleteObject([In] IntPtr hObject);
+
+        public ImageSource ImageSourceFromBitmap(Bitmap bmp)
+        {
+            var handle = bmp.GetHbitmap();
+            try
+            {
+                return Imaging.CreateBitmapSourceFromHBitmap(handle, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally { DeleteObject(handle); }
         }
 
         private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            MainImg.Source = Algorithm
-                .Apply(new Bitmap("../../../apple.png"), (int)e.NewValue)
+            if (sourceImage == null)
+            {
+                MessageBox.Show("You haven't uploaded any files", "Image error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
+            bitmap = (Bitmap)this.imageToEdit.Clone();
+            SourceImage.Source = Algorithm
+                .Apply(bitmap, (int)e.NewValue)
                 .ToSource();
         }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-            MainImg.Source = new Bitmap("../../../apple.png")
-                .ToSource();
+            SourceImage.Source = ImageSourceFromBitmap(sourceImage);
         }
 
+        private void MagicWand(object sender, MouseButtonEventArgs e)
+        {
+            if (sourceImage == null)
+            {
+                MessageBox.Show("You haven't uploaded any files", "Image error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
+            bitmap = (Bitmap)this.imageToEdit.Clone();
+            var mousePosition = e.GetPosition(SourceImage); ;
+           /* SourceImage.Source = Algorithm
+                .FloodFill(bitmap!, (int)mousePosition.X,(int)mousePosition.Y, )
+                .ToSource();*/
+        }
     }
 }

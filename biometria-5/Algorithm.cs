@@ -121,5 +121,43 @@ namespace biometria_5
             bmp.UnlockBits(data);
             return src;
         }
+
+        public static Bitmap FloodFill(Bitmap bitmap, int x, int y, int threshold)
+        {
+            BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+            byte[] vs = new byte[data.Height * data.Stride];
+            Marshal.Copy(data.Scan0, vs, 0, vs.Length);
+
+            Stack<Point> pixels = new Stack<Point>();
+            byte[] color = new byte[3] { (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255) };
+            pixels.Push(new Point(x, y));
+
+            while (pixels.Count > 0)
+            {
+                Point a = pixels.Pop();
+                if (a.X < bitmap.Width * 3 && a.X * 3 > 0 &&
+                        a.Y < bitmap.Height && a.Y > 0)
+                {
+
+                    if (vs[a.X * 3 + a.Y * bitmap.Width * 3] >= vs[x * 3 + y * bitmap.Width * 3] - threshold && vs[a.X * 3 + a.Y * bitmap.Width * 3] <= vs[x * 3 + y * bitmap.Width * 3] - threshold
+                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] >= vs[x * 3 + y * bitmap.Width * 3 + 1] - threshold && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] <= vs[x * 3 + y * bitmap.Width * 3 + 1] + threshold
+                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] >= vs[x * 3 + y * bitmap.Width * 3 + 2] - threshold && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] <= vs[x * 3 + y * bitmap.Width * 3 + 2] + threshold)
+                    {
+                        vs[a.X * 3 + a.Y * bitmap.Width * 3] = color[0];
+                        vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] = color[1];
+                        vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] = color[2];
+                        pixels.Push(new Point(a.X - 1, a.Y));
+                        pixels.Push(new Point(a.X + 1, a.Y));
+                        pixels.Push(new Point(a.X, a.Y - 1));
+                        pixels.Push(new Point(a.X, a.Y + 1));
+                    }
+                }
+            }
+            Marshal.Copy(vs, 0, data.Scan0, vs.Length);
+            bitmap.UnlockBits(data);
+
+            return bitmap;
+        }
     }
+
 }
