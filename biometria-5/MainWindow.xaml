@@ -20,15 +20,15 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-        <Image Name="MainImg"/>
-        <Slider Grid.Row="1" Minimum="1" Maximum="255" Name="range"/>
+        <Image Name="SourceImage" MouseLeftButtonUp="MagicWand"/>
+        <Slider Grid.Row="1" Minimum="1" Maximum="10000" Name="Range"/>
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Slider Grid.Column="0" Minimum="1" Maximum="255" Name="minValue"/>
-            <Slider Grid.Column="1" Minimum="1" Maximum="255" Name="maxValue"/>
+            <Slider Grid.Column="0" Minimum="1" Maximum="255" Name="MinValue"/>
+            <Slider Grid.Column="1" Minimum="1" Maximum="255" Name="MaxValue"/>
         </Grid>
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>

@@ -58,10 +58,6 @@ namespace biometria_5
             finally { DeleteObject(handle); }
         }
 
-        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            
-        }
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
@@ -77,15 +73,17 @@ namespace biometria_5
             }
             Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
             bitmap = (Bitmap)this.imageToEdit.Clone();
-            var mousePosition = e.GetPosition(SourceImage); ;
-           /* SourceImage.Source = Algorithm
-                .FloodFill(bitmap!, (int)mousePosition.X,(int)mousePosition.Y, )
-                .ToSource();*/
+            var mousePosition = e.GetPosition(SourceImage);
+            if (imageToEdit == null) return;
+            SourceImage.Source = ImageSourceFromBitmap(Algorithm
+            .FloodFill(bitmap!, (int)mousePosition.X, (int)mousePosition.Y, (int)MinValue.Value, (int)MaxValue.Value, (int)Range.Value));
         }
         private void Apply_Click(object sender, RoutedEventArgs e)
         {
-            MainImg.Source = Algorithm
-                .Apply(new Bitmap("../../../apple.png"), (int)maxValue.Value , (int)minValue.Value)
+            Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
+            bitmap = (Bitmap)this.imageToEdit.Clone();
+            SourceImage.Source = Algorithm
+                .Apply(bitmap, (int)MaxValue.Value, (int)MinValue.Value)
                 .ToSource();
         }
 

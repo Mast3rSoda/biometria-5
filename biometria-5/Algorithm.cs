@@ -123,8 +123,9 @@ namespace biometria_5
             bmp.UnlockBits(data);
             return src;
         }
+    
 
-        public static Bitmap FloodFill(Bitmap bitmap, int x, int y, int threshold)
+    public static Bitmap FloodFill(Bitmap bitmap, int x, int y, int thresholdMin, int thresholdMax, int maxPixels)
         {
             BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             byte[] vs = new byte[data.Height * data.Stride];
@@ -132,26 +133,33 @@ namespace biometria_5
 
             Stack<Point> pixels = new Stack<Point>();
             byte[] color = new byte[3] { (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255) };
-            pixels.Push(new Point(x, y));
-
-            while (pixels.Count > 0)
+            pixels.Push(new Point(x*3, y));
+            int pixelCount = 0;
+            while (pixels.Count > 0 && pixelCount<maxPixels)
             {
                 Point a = pixels.Pop();
-                if (a.X < bitmap.Width * 3 && a.X * 3 > 0 &&
-                        a.Y < bitmap.Height && a.Y > 0)
+               
+                if (a.X < bitmap.Width * 3 -3 && a.X * 3 > 3 &&
+                        a.Y < bitmap.Height-3 && a.Y > 3)
                 {
-
-                    if (vs[a.X * 3 + a.Y * bitmap.Width * 3] >= vs[x * 3 + y * bitmap.Width * 3] - threshold && vs[a.X * 3 + a.Y * bitmap.Width * 3] <= vs[x * 3 + y * bitmap.Width * 3] - threshold
-                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] >= vs[x * 3 + y * bitmap.Width * 3 + 1] - threshold && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] <= vs[x * 3 + y * bitmap.Width * 3 + 1] + threshold
-                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] >= vs[x * 3 + y * bitmap.Width * 3 + 2] - threshold && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] <= vs[x * 3 + y * bitmap.Width * 3 + 2] + threshold)
+                    pixelCount++;
+                    if (vs[a.X * 3 + a.Y * bitmap.Width * 3] >= vs[x + y * bitmap.Width * 3] - thresholdMin && vs[a.X * 3 + a.Y * bitmap.Width * 3] <= vs[x + y * bitmap.Width * 3] + thresholdMax
+                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] >= vs[x + y * bitmap.Width * 3 + 1] - thresholdMin && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] <= vs[x + y * bitmap.Width * 3 + 1] + thresholdMax
+                        && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] >= vs[x + y * bitmap.Width * 3 + 2] - thresholdMin && vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] <= vs[x + y * bitmap.Width * 3 + 2] + thresholdMax)
                     {
                         vs[a.X * 3 + a.Y * bitmap.Width * 3] = color[0];
                         vs[a.X * 3 + a.Y * bitmap.Width * 3 + 1] = color[1];
                         vs[a.X * 3 + a.Y * bitmap.Width * 3 + 2] = color[2];
-                        pixels.Push(new Point(a.X - 1, a.Y));
-                        pixels.Push(new Point(a.X + 1, a.Y));
-                        pixels.Push(new Point(a.X, a.Y - 1));
-                        pixels.Push(new Point(a.X, a.Y + 1));
+
+                        if (vs[a.X * 3 + a.Y * bitmap.Width * 3 - 3] != color[0])
+                            pixels.Push(new Point(a.X - 1, a.Y));
+                        if (vs[a.X * 3 + a.Y * bitmap.Width * 3 + 3] != color[0])
+                            pixels.Push(new Point(a.X + 1, a.Y));
+                        if (vs[a.X * 3 + (a.Y+1) * bitmap.Width * 3] != color[0])
+
+                            pixels.Push(new Point(a.X, a.Y + 1));
+                        if (vs[a.X * 3 + (a.Y - 1) * bitmap.Width * 3] != color[0])
+                            pixels.Push(new Point(a.X, a.Y - 1));
                     }
                 }
             }
