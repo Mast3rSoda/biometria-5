@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,23 @@ namespace biometria_5
         public MainWindow()
         {
             InitializeComponent();
+
+            MainImg.Source = new Bitmap("../../../apple.png")
+                .ToSource();
         }
+
+        private void Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            MainImg.Source = Algorithm
+                .Apply(new Bitmap("../../../apple.png"), (int)e.NewValue)
+                .ToSource();
+        }
+
+        private void Reset_Click(object sender, RoutedEventArgs e)
+        {
+            MainImg.Source = new Bitmap("../../../apple.png")
+                .ToSource();
+        }
+
     }
 }
