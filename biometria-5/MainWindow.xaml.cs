@@ -82,22 +82,13 @@ namespace biometria_5
             Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
             bitmap = (Bitmap)this.imageToEdit.Clone();
             var mousePosition = e.GetPosition(SourceImage);
-            //mousePosition *= imageToEdit.Width / Image;
             var w = imageToEdit.Width  / SourceImage.ActualWidth  ;
             var h = imageToEdit.Height / SourceImage.ActualHeight ;
             mousePosition.X *= w;
             mousePosition.Y *= h;
             if (imageToEdit == null) return;
             SourceImage.Source = ImageSourceFromBitmap(Algorithm
-            .FloodFill(bitmap!, (int)mousePosition.X, (int)mousePosition.Y, (int)MinValue.Value, (int)MaxValue.Value, SliderValue));
-        }
-        private void Apply_Click(object sender, RoutedEventArgs e)
-        {
-            Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
-            bitmap = (Bitmap)this.imageToEdit.Clone();
-            SourceImage.Source = Algorithm
-                .Apply(bitmap, (int)MaxValue.Value, (int)MinValue.Value)
-                .ToSource();
+            .FloodFill(bitmap!, (int)mousePosition.X, (int)mousePosition.Y, (int)MaxValue.Value, SliderValue, (bool)GlobalCheck.IsChecked));
         }
 
     }
