@@ -80,6 +80,14 @@ namespace biometria_5
                 return;
             }
             Bitmap bitmap = new Bitmap(this.sourceImage.Width, this.sourceImage.Height);
+            if ((bool)GlobalCheck.IsChecked)
+            {
+                    bitmap = (Bitmap)this.imageToEdit.Clone();
+                    SourceImage.Source = Algorithm
+                        .Apply(bitmap, 255 - (int)MaxValue.Value, (int)MaxValue.Value)
+                        .ToSource();
+                return;
+            }
             bitmap = (Bitmap)this.imageToEdit.Clone();
             var mousePosition = e.GetPosition(SourceImage);
             var w = imageToEdit.Width  / SourceImage.ActualWidth  ;
