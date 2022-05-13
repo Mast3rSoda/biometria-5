@@ -27,16 +27,15 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Slider Grid.Column="0" Minimum="1" Maximum="255" Name="MinValue"/>
-            <Slider Grid.Column="1" Minimum="1" Maximum="255" Name="MaxValue"/>
+                <CheckBox Grid.Column="0" Name="GlobalCheck">Global</CheckBox>
+                    <Slider Grid.Column="1" Minimum="0" Maximum="255" Name="MaxValue"/>
         </Grid>
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="Reset" Click="Reset_Click"/>
-            <Button Grid.Column="1" Content="Apply" Click="Apply_Click"/>
+            <Button Grid.Column="0" Grid.ColumnSpan="2" Content="Reset" Click="Reset_Click"/>
 
         </Grid>
         </Grid>
