@@ -130,12 +130,12 @@ namespace biometria_5
             BitmapData data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             byte[] vs = new byte[data.Height * data.Stride];
             Marshal.Copy(data.Scan0, vs, 0, vs.Length);
-
+            var isTheSame = vs;
             int GetIndex(int x, int y) =>
                 x * 3 + y * data.Stride;
             (int X, int Y) GetCoords(int offset) =>
                 (x / 3 % 3, offset / data.Stride);
-
+            maxPixels *= 3;
             int firstPos = x + y * bitmap.Width * 3;
             int[] directions =
             {
@@ -156,11 +156,11 @@ namespace biometria_5
                     {
                         int offset = a.X * 3 + a.Y * bitmap.Width * 3;
 
-                        bool match = true;
+                        bool match = false;
                         if (
                            vs[offset + k] >= vs[firstPos + k] - thresholdMin &&
                            vs[offset + k] <= vs[firstPos + k] + thresholdMax)
-                           match = false;
+                           match = true;
 
                         pixelCount++;
                         
@@ -176,7 +176,6 @@ namespace biometria_5
                 }
             Marshal.Copy(vs, 0, data.Scan0, vs.Length);
             bitmap.UnlockBits(data);
-
             return bitmap;
         }
     }
